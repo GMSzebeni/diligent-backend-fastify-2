@@ -9,7 +9,7 @@ GET {{host}}/api/pets
 POST {{host}}/api/pets
 Content-Type: application/json
 
-{"name": "Fluffy", "age": 5, "weightInKg": 7, "kind": "cat"}
+{"name": "Jenny", "age": 5, "weightInKg": 7, "kind": "cat"}
 
 ### 
 
