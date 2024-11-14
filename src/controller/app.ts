@@ -6,9 +6,17 @@ import { OwnerRepository } from '../repository/owner.repository';
 import { OwnerService } from '../service/owner.service';
 import { createPetRoute } from './routes/pet.routes';
 import { createOwnerRoute } from './routes/owner.routes';
+import { Pet } from '../entity/pet.type';
 
 type Dependencies = {
   dbClient: DbClient;
+}
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    petService: PetService,
+    ownerService: OwnerService
+  }
 }
 
 export default function createApp(options = {}, dependencies: Dependencies) {
@@ -21,9 +29,11 @@ export default function createApp(options = {}, dependencies: Dependencies) {
 
   const app = fastify(options);
 
-  app.register(createPetRoute, { petService, prefix: '/api/pets' });
+  app.decorate('petService', petService);
+  app.decorate('ownerService', ownerService);
 
-  app.register(createOwnerRoute, { petService, ownerService, prefix: '/api/owners' });
+  app.register(createPetRoute, { prefix: '/api/pets' });
+  app.register(createOwnerRoute, { prefix: '/api/owners' });
 
   return app;
 }

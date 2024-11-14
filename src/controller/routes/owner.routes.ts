@@ -1,16 +1,9 @@
 import { FastifyPluginAsync } from "fastify";
-import { OwnerService } from "../../service/owner.service";
-import { PetService } from "../../service/pet.service";
 import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import { getOwnerByIdSchema, getOwnersSchema, postOwnerSchema } from "../owner.schemas";
 import { putPetsToOwnersSchema } from "../pet.schemas";
 
-type PluginOption = {
-    ownerService: OwnerService,
-    petService: PetService
-}
-
-export const createOwnerRoute: FastifyPluginAsync<PluginOption> = async (app, { petService, ownerService }) => {
+export const createOwnerRoute: FastifyPluginAsync = async (app) => {
     const appWithTypeProvider = app.withTypeProvider<JsonSchemaToTsProvider>();
 
     appWithTypeProvider.put(
@@ -18,7 +11,7 @@ export const createOwnerRoute: FastifyPluginAsync<PluginOption> = async (app, { 
         { schema: putPetsToOwnersSchema },
         async (request) => {
             const { petId, ownerId } = request.params;
-            const updated = await petService.adopt(petId, ownerId);
+            const updated = await app.petService.adopt(petId, ownerId);
             return updated;
         }
     )
@@ -27,7 +20,7 @@ export const createOwnerRoute: FastifyPluginAsync<PluginOption> = async (app, { 
         '/',
         { schema: getOwnersSchema },
         async () => {
-            return await ownerService.getAll();
+            return await app.ownerService.getAll();
         }
     )
 
@@ -36,7 +29,7 @@ export const createOwnerRoute: FastifyPluginAsync<PluginOption> = async (app, { 
         { schema: getOwnerByIdSchema },
         async (request) => {
             const { id } = request.params;
-            return await ownerService.getById(id);
+            return await app.ownerService.getById(id);
         }
     )
 
@@ -45,7 +38,7 @@ export const createOwnerRoute: FastifyPluginAsync<PluginOption> = async (app, { 
         { schema: postOwnerSchema },
         async (request, reply) => {
             const ownerProps = request.body;
-            const created = await ownerService.create(ownerProps);
+            const created = await app.ownerService.create(ownerProps);
             reply.status(201);
             return created;
         }
